@@ -3,7 +3,9 @@ from flask_cors import CORS
 import sqlite3
 
 app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "https://forfaitmoinscher.com"])
+CORS(app, origins=["http://localhost:5173", "https://forfaitmoinscher.com"], 
+     supports_credentials=True, allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 
 @app.after_request
 def apply_cors(response):
