@@ -3,7 +3,7 @@ from flask_cors import CORS
 import sqlite3
 
 app = Flask(__name__)
-CORS(app, origins=["https://forfaitmoinscher.com"])
+CORS(app, origins=["http://localhost:5173", "https://forfaitmoinscher.com"])
 
 @app.after_request
 def apply_cors(response):
