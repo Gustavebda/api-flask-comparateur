@@ -14,7 +14,6 @@ def apply_cors(response):
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response  # ✅ Ne pas jsonify(response), c'est déjà une réponse HTTP !
 
-
 def get_forfaits():
     conn = sqlite3.connect('forfaits.db')
     cursor = conn.cursor()
