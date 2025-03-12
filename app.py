@@ -7,11 +7,12 @@ CORS(app, origins=["https://forfaitmoinscher.com"])
 
 @app.after_request
 def apply_cors(response):
-    response = jsonify(response)
-    response.headers.add('Access-Control-Allow-Origin', 'https://forfaitmoinscher.com')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
-    return response
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Access-Control-Allow-Origin"] = "https://forfaitmoinscher.com"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response  # ✅ Ne pas jsonify(response), c'est déjà une réponse HTTP !
 
 
 def get_forfaits():
@@ -44,7 +45,7 @@ def comparer_forfaits():
         budget_max = float(request.args.get('budget_max', 999))
         data_min = float(request.args.get('data_min', 0))
         engagement = request.args.get('engagement', "Sans engagement")
-        reseau_pref = request.args.getlist('reseau_pref')
+        reseau_pref = request.args.getlist('reseau_pref')   
         cible = request.args.get('cible', None)
         only_5g = request.args.get('only_5g', 'false').lower() == 'true'
 
