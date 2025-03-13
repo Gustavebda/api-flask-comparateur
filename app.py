@@ -10,12 +10,18 @@ CORS(app, resources={r"/*": {"origins": ["http://localhost:5173", "https://forfa
 
 @app.after_request
 def apply_cors(response):
+    origin = request.headers.get("Origin")
+    allowed_origins = ["http://localhost:5173", "https://forfaitmoinscher.com", "https://www.forfaitmoinscher.com"]
+
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin  # ✅ Autorisation dynamique de l'origine
+
     response.headers["Cache-Control"] = "no-store"
-    response.headers["Access-Control-Allow-Origin"] = "https://forfaitmoinscher.com"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-    return response  # ✅ Ne pas jsonify(response), c'est déjà une réponse HTTP !
+    
+    return response
 
 def get_forfaits():
     conn = sqlite3.connect('forfaits.db')
@@ -34,12 +40,10 @@ def get_forfaits():
             "appels": forfait[6],
             "sms": forfait[7],
             "engagement": forfait[8],
-            "data_etranger": forfait[5],
             "techno": forfait[14] if forfait[14] else ""
         })
     conn.close()
     return forfaits_list
-
 
 @app.route('/comparateur', methods=['GET', 'OPTIONS'])
 def comparer_forfaits():
@@ -67,7 +71,6 @@ def comparer_forfaits():
     except Exception as e:
         print(f"❌ ERREUR : {str(e)}")
         return jsonify({"error": str(e)}), 500
-
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
