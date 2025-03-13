@@ -33,13 +33,14 @@ def get_forfaits():
         forfaits_list.append({
             "id": forfait[0],
             "nom": forfait[1],
-            "reseau": forfait[2],
-            "prix": float(forfait[3]) if forfait[3] else 0.0,
-            "data": forfait[4],
-            "data_etranger": forfait[5],
-            "appels": forfait[6],
-            "sms": forfait[7],
-            "engagement": forfait[8],
+            "operateur": forfait[2],  # ✅ Ajout de `operateur` ici
+            "reseau": forfait[3],
+            "prix": float(forfait[4]) if forfait[4] else 0.0,
+            "data": forfait[5],
+            "data_etranger": forfait[6],
+            "appels": forfait[7],
+            "sms": forfait[8],
+            "engagement": forfait[9],
             "techno": forfait[14] if forfait[14] else ""
         })
     conn.close()
