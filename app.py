@@ -15,7 +15,7 @@ def apply_cors(response):
     allowed_origins = ["http://localhost:5173", "https://forfaitmoinscher.com", "https://www.forfaitmoinscher.com"]
 
     if origin in allowed_origins:
-        response.headers["Access-Control-Allow-Origin"] = origin  # ✅ Autorisation dynamique de l'origine
+        response.headers["Access-Control-Allow-Origin"] = origin
 
     response.headers["Cache-Control"] = "no-store"
     response.headers["Access-Control-Allow-Credentials"] = "true"
@@ -45,7 +45,7 @@ def get_forfaits():
                 "operateur": operateur,
                 "reseau": reseau,
                 "prix": float(forfait[4]) if forfait[4] else 0.0,
-                "data": forfait[5] if forfait[5] else "0 Mo",  # ✅ Récupération brute du texte
+                "data": forfait[5] if forfait[5] else "0 Mo",  # ✅ Texte brut
                 "data_etranger": forfait[6] if forfait[6] else "0 Mo",
                 "appels": forfait[7],
                 "sms": forfait[8],
@@ -73,7 +73,7 @@ def comparer_forfaits():
 
         resultats = [f for f in forfaits if
                      f["prix"] <= budget_max and
-                     float(re.sub(r'[^\d.]', '', f["data"])) >= data_min and  # ✅ Extraction du nombre pour la comparaison
+                     float(re.sub(r'[^\d.]', '', f["data"])) >= data_min and  # ✅ Correction
                      (engagement == "Sans engagement" or f['engagement'] == engagement) and
                      (not reseau_pref or f['reseau'] in reseau_pref) and
                      (not only_5g or f['techno'] == "5G")]
