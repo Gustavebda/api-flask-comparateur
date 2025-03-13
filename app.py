@@ -45,7 +45,7 @@ def get_forfaits():
                 "operateur": operateur,
                 "reseau": reseau,
                 "prix": float(forfait[4]) if forfait[4] else 0.0,
-                "data": forfait[5] if forfait[5] else "0 Mo",  # ✅ Texte brut
+                "data": forfait[5] if forfait[5] else "0 Mo",  # ✅ Récupération brute
                 "data_etranger": forfait[6] if forfait[6] else "0 Mo",
                 "appels": forfait[7],
                 "sms": forfait[8],
@@ -54,6 +54,7 @@ def get_forfaits():
             })
 
         conn.close()
+        print(f"📡 {len(forfaits_list)} forfaits récupérés avant filtrage :", forfaits_list)  # ✅ Vérifie si des forfaits existent
         return forfaits_list
 
     except Exception as e:
