@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import sqlite3
+import re
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "https://forfaitmoinscher.com", "https://www.forfaitmoinscher.com"], supports_credentials=True)
@@ -60,31 +61,47 @@ def comparer_forfaits():
         only_5g = request.args.get('only_5g', 'false').lower() == 'true'
         only_suisse = request.args.get('only_suisse', 'false').lower() == 'true'
 
-        print(f"🔍 Requête reçue avec : budget_max={budget_max}, data_min={data_min}, engagement={engagement}, reseau_pref={reseau_pref}, cible={cible}, only_5g={only_5g}, only_suisse={only_suisse}")
+        print(f"🔍 Requête reçue avec : budget_max={budget_max}, data_min={data_min}, engagement={engagement}, reseau_pref={reseau_pref}, only_5g={only_5g}, only_suisse={only_suisse}")
 
         forfaits = get_forfaits()
         print(f"📊 {len(forfaits)} forfaits avant filtrage")
 
-        resultats = []
-        for f in forfaits:
-            # ✅ Extraction correcte du nombre de Go/Mo
+        # 1️⃣ Budget max
+        resultats = [f for f in forfaits if f["prix"] <= budget_max]
+        print(f"💰 {len(resultats)} forfaits après filtre budget_max")
+
+        # 2️⃣ Data minimum (⚠ Vérifions ici)
+        filtered_data = []
+        for f in resultats:
             try:
-                data_value = float(f['data'].replace("Go", "").replace("Mo", "").strip())  # ✅ Extrait uniquement le nombre
-            except ValueError:
-                data_value = 0.0  # ✅ Sécuriser si une valeur est mal formatée
+                # ✅ Extraction correcte du nombre de Go/Mo
+                data_value = re.sub(r'[^\d.]', '', f["data"])  # Garde seulement les chiffres et le point
+                if data_value:
+                    data_value = float(data_value)
+                else:
+                    data_value = 0.0  # ✅ Sécuriser si la donnée est vide
 
-            print(f"🔍 Forfait : {f['nom']} | Data : {f['data']} (extrait : {data_value}) | Prix : {f['prix']} | Réseau : {f['reseau']}")
+                print(f"🔍 Test data_min : {f['data']} (extrait : {data_value}) vs {data_min}")
+                
+                if data_value >= data_min:
+                    filtered_data.append(f)
+            except ValueError as e:
+                print(f"❌ ERREUR lors de la conversion de `data` : {e}")
 
-            # ✅ Appliquer les filtres progressivement
-            if (
-                f['prix'] <= budget_max and
-                data_value >= data_min and
-                (engagement == "Sans engagement" or f['engagement'] == engagement) and
-                (not reseau_pref or f['reseau'] in reseau_pref) and
-                (not only_5g or (f['techno'].strip().lower() == "5g")) and
-                (not only_suisse or (f['suisse'].strip().lower() == "oui"))
-            ):
-                resultats.append(f)
+        resultats = filtered_data
+        print(f"📡 {len(resultats)} forfaits après filtre data_min")
+
+        # 3️⃣ Engagement
+        resultats = [f for f in resultats if engagement == "Sans engagement" or f['engagement'] == engagement]
+        print(f"📅 {len(resultats)} forfaits après filtre engagement")
+
+        # 4️⃣ Réseau préféré
+        resultats = [f for f in resultats if not reseau_pref or f['reseau'] in reseau_pref]
+        print(f"📶 {len(resultats)} forfaits après filtre reseau_pref")
+
+        # 5️⃣ Option 5G
+        resultats = [f for f in resultats if not only_5g or f['techno'] == "5G"]
+        print(f"🚀 {len(resultats)} forfaits après filtre only_5g")
 
         print(f"✅ {len(resultats)} forfaits trouvés après filtrage.")
 
